@@ -1,13 +1,15 @@
 import * as toml from "toml";
 import * as fs from "fs";
+import * as os from "os";
 import concat = require("concat-stream");
 let workflowsPath = "../workflows";
 let tasksPath = "./tasks";
+let outputPathRoot = os.tmpdir();
 
 /**
  * Main workflow runner
  */
-function main() {
+async function main() {
 
     // Get all workflows
     let workflows = fs.readdirSync(__dirname + "/" + workflowsPath).map(file => {
@@ -18,31 +20,29 @@ function main() {
         return file.slice(0, file.length - 3);
     });
 
-    // Get the workflow name
+    // Get the target workflow name
     let workflowName = process.argv[2];
 
     // Load the workflow or display error
     if (workflowName && workflows.indexOf(workflowName) > -1) {
         console.log(`Executing workflow: ${workflowName}`);
 
-        getWorkflow(workflowName).then(workflow => {
-            try {
-                let tasks = workflow.tasks.map(task => {
-                    if (taskNames.indexOf(task.name) > -1) {
-                        return stageTask(task);
-                    } else {
-                        throw `${task.name} not found.`;
-                    }
-                });
+        let workflow = await getWorkflow(workflowName);
 
-                runTask(tasks, []);
-            } catch (err) {
-                console.log("Error staging tasks: " + err);
-            }
+        try {
+            let tasks = workflow.tasks.map(task => {
+                if (taskNames.indexOf(task.name) > -1) {
+                    return stageTask(task);
+                } else {
+                    throw `${task.name} not found.`;
+                }
+            });
 
-        }).catch(err => {
-            console.log("Error parsing workflow: " + err);
-        });
+            runTask(tasks, []);
+        } catch (err) {
+            console.log("Error staging tasks: " + err);
+        }
+
 
     } else {
         console.log(`Could not find workflow${workflowName ? ": " + workflowName : ", none defined." }`);
@@ -75,6 +75,7 @@ function runTask(taskList: Array<(files: Array<string>) => Promise<TaskResponse>
  */
 function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<TaskResponse> {
     return (files: Array<string>) => {
+        taskDef.path = outputPathRoot;
         return new Promise((resolve, reject) => {
             console.log(`Running task ${taskDef.name}...`);
             let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => TaskResponse;
@@ -88,8 +89,6 @@ function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<T
     };
 }
 
-let t = require("./tasks/LOADTSV");
-
 /**
  * Fetch the workflow description from disk and parse it into a JSON file
  * @param name Name of the workflow
@@ -97,7 +96,7 @@ let t = require("./tasks/LOADTSV");
  */
 function getWorkflow(name: string): Promise<Workflow> {
     return new Promise((resolve, reject) => {
-        fs.createReadStream(`${__dirname}/${workflowsPath}/${name}.toml`, "utf8").pipe(concat(function (data: any) {
+        fs.createReadStream(`${__dirname}/${workflowsPath}/${name}.toml`).pipe(concat(function (data: any) {
             try {
                 let parsed = toml.parse(data);
                 resolve(parsed);
@@ -118,6 +117,7 @@ main();
 export interface TaskDefinition {
     name: string;
     desc: string;
+    path: string;
 }
 
 export interface Workflow {

@@ -6,7 +6,10 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "build": "tslint -c tslint.json 'src/**/*.ts' && tsc -p . && cp -r workflows build/",
-    "workflow": "npm run clean && npm run build && node build/src/index.js"
+    "workflow": "npm run clean && npm run build && node build/src/index.js",
+    "test": "npm run build_tests && npm run execute_tests",
+    "execute_tests": "tslint -c tslint.json 'tests/**/*.ts' && mocha --require source-map-support/register --opts tests/mocha.opts build/tests/**/*-test.js",
+    "build_tests": "tslint -c tslint.json 'src/**/*.ts' && npm run clean && tsc -p . "
   },
   "repository": {
     "type": "git",
@@ -22,9 +25,17 @@
   },
   "homepage": "https://github.com/enigma-io/workflow-interview-challenge#readme",
   "dependencies": {
+    "@types/chai": "^3.4.35",
     "@types/concat-stream": "^1.6.0",
+    "@types/mocha": "^2.2.40",
+    "@types/node": "^7.0.11",
+    "chai": "^3.5.0",
     "concat-stream": "^1.6.0",
+    "mocha": "^3.1.0",
+    "mocha-clean": "^1.0.0",
+    "source-map-support": "^0.4.15",
     "toml": "^2.3.2",
+    "ts-node": "^3.2.0",
     "tslint": "^4.5.1",
     "typescript": "^2.2.2"
   }
