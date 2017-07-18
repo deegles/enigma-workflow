@@ -1,0 +1,31 @@
+{
+  "name": "enigma",
+  "version": "1.0.0",
+  "description": "Enigma Workflow Interview Challenge",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "build": "tslint -c tslint.json 'src/**/*.ts' && tsc -p . && cp -r workflows build/",
+    "workflow": "npm run clean && npm run build && node build/src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enigma-io/workflow-interview-challenge.git"
+  },
+  "keywords": [
+    "Enigma"
+  ],
+  "author": "Diego Benitez <diego@vokkal.co>",
+  "license": "SEE LICENSE IN License.txt",
+  "bugs": {
+    "url": "https://github.com/enigma-io/workflow-interview-challenge/issues"
+  },
+  "homepage": "https://github.com/enigma-io/workflow-interview-challenge#readme",
+  "dependencies": {
+    "@types/concat-stream": "^1.6.0",
+    "concat-stream": "^1.6.0",
+    "toml": "^2.3.2",
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.2"
+  }
+}

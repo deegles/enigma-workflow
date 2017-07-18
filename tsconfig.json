@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "build/",
+    "sourceMap": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "target": "es5",
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "rootDir": ".",
+    "lib": ["es2015", "es2015.promise", "dom"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": [
+    "lib",
+    "build"
+  ]
+}

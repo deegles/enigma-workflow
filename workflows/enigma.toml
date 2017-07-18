@@ -1,0 +1,38 @@
+# This is a TOML document. https://github.com/toml-lang/toml
+
+title = "Workflow definition file"
+
+[[tasks]]
+name = "LOADTSV"
+desc = "Load a TSV file from a URL"
+url = "https://raw.githubusercontent.com/enigma-io/workflow-interview-challenge/master/inventory.tsv"
+
+[[tasks]]
+name = "TSVTOJSON"
+desc = "Convert a TSV file into JSON"
+
+[[tasks]]
+name = "COUNTBYTES"
+desc = "Fetch and print the number of bytes of a file."
+
+[[tasks]]
+name = "MIN"
+desc = "Get the minimum value of a column of JSON data"
+out = "stats.json"
+column = 3
+
+[[tasks]]
+name = "MAX"
+desc = "Get the maximum value of a column of JSON data"
+out = "stats.json"
+column = 3
+
+[[tasks]]
+name = "MEDIAN"
+desc = "Get the median value of a column of JSON data"
+out = "stats.json"
+column = 3
+
+[[tasks]]
+name = "COUNTBYTES"
+desc = "Fetch and print the number of bytes of a file."
