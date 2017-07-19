@@ -11,7 +11,7 @@ export default function (files: Array<string>, params: TaskDefinition): Promise<
             });
 
             resolve({
-                message: `bytes:filename\n\t${results.join("\n\t")}`,
+                message: `\tbytes:filename\n\t${results.join("\n\t")}`,
                 files: files
             });
 
