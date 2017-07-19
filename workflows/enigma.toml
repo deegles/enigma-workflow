@@ -6,6 +6,7 @@ title = "Workflow definition file"
 name = "LOADTSV"
 desc = "Load a TSV file from a URL"
 url = "https://raw.githubusercontent.com/enigma-io/workflow-interview-challenge/master/inventory.tsv"
+retries = 3
 
 [[tasks]]
 name = "TSVTOJSON"
