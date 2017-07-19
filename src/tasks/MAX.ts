@@ -6,28 +6,34 @@ export interface MaxTaskDefinition extends TaskDefinition {
     column: number;
 }
 
-export default function (files: Array<string>, params: MaxTaskDefinition): TaskResponse {
-    let message = "";
-    let dest = params.path + params.out;
+export default function (files: Array<string>, params: MaxTaskDefinition): Promise<TaskResponse> {
+    return new Promise((resolve, reject) => {
+        try {
+            let message = "";
+            let dest = params.path + params.out;
 
-    files.forEach(file => {
-        let json = JSON.parse(fs.readFileSync(file).toString("utf8"));
-        let columnData: Array<string> = json["data"].slice(1).map((row: Array<string>) => {
-            return row[params.column];
-        });
+            files.forEach(file => {
+                let json = JSON.parse(fs.readFileSync(file).toString("utf8"));
+                let columnData: Array<string> = json["data"].slice(1).map((row: Array<string>) => {
+                    return row[params.column];
+                });
 
-        let result = getMax(columnData.map(datum => {
-            return parseFloat(datum);
-        }));
+                let result = getMax(columnData.map(datum => {
+                    return parseFloat(datum);
+                }));
 
-        fs.appendFileSync(dest, JSON.stringify({max: result}) + "\n");
-        message += "MAX: " + result;
+                fs.appendFileSync(dest, JSON.stringify({max: result}) + "\n");
+                message += "MAX: " + result;
+            });
+
+            resolve({
+                message: message,
+                files: [dest]
+            });
+        } catch (err) {
+            reject(err);
+        }
     });
-
-    return {
-        message: message,
-        files: [dest]
-    };
 }
 
 function getMax(data: Array<number>): number {

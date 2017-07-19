@@ -6,27 +6,33 @@ export interface MedianTaskDefinition extends TaskDefinition {
     column: number;
 }
 
-export default function (files: Array<string>, params: MedianTaskDefinition): TaskResponse {
-    let message = "";
-    let dest = params.path + params.out;
-    files.forEach(file => {
-        let json = JSON.parse(fs.readFileSync(file).toString("utf8"));
-        let columnData: Array<string> = json["data"].slice(1).map((row: Array<string>) => {
-            return row[params.column];
-        });
+export default function (files: Array<string>, params: MedianTaskDefinition): Promise<TaskResponse> {
+    return new Promise((resolve, reject) => {
+        try {
+            let message = "";
+            let dest = params.path + params.out;
+            files.forEach(file => {
+                let json = JSON.parse(fs.readFileSync(file).toString("utf8"));
+                let columnData: Array<string> = json["data"].slice(1).map((row: Array<string>) => {
+                    return row[params.column];
+                });
 
-        let result = getMedian(columnData.map(datum => {
-            return parseFloat(datum);
-        }));
+                let result = getMedian(columnData.map(datum => {
+                    return parseFloat(datum);
+                }));
 
-        fs.appendFileSync(dest, JSON.stringify({median: result}) + "\n");
-        message += "MEDIAN: " + result;
+                fs.appendFileSync(dest, JSON.stringify({median: result}) + "\n");
+                message += "MEDIAN: " + result;
+            });
+
+            resolve({
+                message: message,
+                files: [dest]
+            });
+        } catch (err) {
+            reject(err);
+        }
     });
-
-    return {
-        message: message,
-        files: [dest]
-    };
 }
 
 function getMedian(data: Array<number>): number {
