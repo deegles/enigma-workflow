@@ -33,13 +33,22 @@ async function main() {
         let workflow = await getWorkflow(workflowName);
 
         try {
-            let tasks = workflow.tasks.map(task => {
+            let tasksInter = workflow.tasks.map(task => {
                 if (taskNames.indexOf(task.name) > -1) {
-                    return stageTask(task);
+                    return {staged: stageTask(task), parallel: task.parallel};
                 } else {
                     throw `${task.name} not found.`;
                 }
             });
+
+            let tasks = tasksInter.reduce((list, curr: { staged: (files: Array<string>) => Promise<TaskResponse>, parallel: boolean }) => {
+                if (curr.parallel && list.length > 0) {
+                    list[list.length - 1] = list[list.length - 1].concat([curr.staged]);
+                } else {
+                    list.push([curr.staged]);
+                }
+                return list;
+            }, []);
 
             runTask(tasks, []);
         } catch (err) {
@@ -57,13 +66,19 @@ async function main() {
  * @param taskList
  * @param files
  */
-function runTask(taskList: Array<(files: Array<string>) => Promise<TaskResponse>>, files: Array<string>) {
+function runTask(taskList: Array<Array<(files: Array<string>) => Promise<TaskResponse>>>, files: Array<string>) {
     let currentTask = taskList[0];
 
-    currentTask(files).then(result => {
-        console.log(result.message);
+    Promise.all(currentTask.map(p => {
+        return p(files);
+    })).then(results => {
+
+        results.forEach(result => {
+            console.log(result.message);
+        });
+
         if (taskList.length > 1) {
-            runTask(taskList.slice(1), result.files);
+            runTask(taskList.slice(1), results[0].files);
         } else {
             console.log("Workflow complete!");
         }
@@ -121,6 +136,7 @@ export interface TaskDefinition {
     name: string;
     desc: string;
     path: string;
+    parallel: boolean;
 }
 
 export interface Workflow {
