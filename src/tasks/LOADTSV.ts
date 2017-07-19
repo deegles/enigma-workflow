@@ -12,11 +12,10 @@ export default function (files: Array<string>, params: LoadTSVTaskDefinition): P
         let dest = params.path + parts[parts.length - 1];
 
         try {
-            download(params.url, dest, (err) => {
+            download(params.url, dest, params.retries || 0, (err) => {
                 if (err) {
                     return reject(err.message);
                 }
-
                 resolve({
                     message: "Download destination: " + dest,
                     files: [dest]
@@ -29,14 +28,20 @@ export default function (files: Array<string>, params: LoadTSVTaskDefinition): P
     });
 }
 
-function download(url: string, dest: string, callback: (err?: Error) => void) {
-    request.get({url: url, encoding: "utf8"}, function (err: any, response: any, body: any) {
-        fs.writeFile(dest, body, "utf8", function (err: Error) {
-            if (err) {
-                return callback(err);
-            }
+function download(url: string, dest: string, retries: number, callback: (err?: Error) => void) {
 
-            callback();
+    if (retries < 0) {
+        callback(new Error("Unable to fetch resource at " + url));
+    } else {
+        request.get({url: url, encoding: "utf8"}, function (err: any, response: any, body: any) {
+            if (err || response.statusCode !== 200) {
+                console.log(response.body);
+                download(url, dest, retries - 1, callback);
+            } else {
+                fs.writeFile(dest, body, "utf8", function (err: Error) {
+                    callback();
+                });
+            }
         });
-    });
+    }
 }

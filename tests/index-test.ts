@@ -19,7 +19,8 @@ describe("LOADTSV", () => {
             desc: "LOADTSV test",
             path: outputPathRoot,
             url: "https://raw.githubusercontent.com/enigma-io/workflow-interview-challenge/master/inventory.tsv",
-            parallel: false
+            parallel: false,
+            retries: 0
         };
 
         let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: LoadTSVTaskDefinition) => Promise<TaskResponse>;
@@ -40,7 +41,8 @@ describe("TSVTOJSON", () => {
             name: "TSVTOJSON",
             desc: "TSVTOJSON test",
             path: outputPathRoot,
-            parallel: false
+            parallel: false,
+            retries: 0
         };
 
         let tsvPath = __dirname + "/tsv/inventory.tsv";
@@ -71,7 +73,8 @@ describe("COUNTBYTES", () => {
             name: "COUNTBYTES",
             desc: "COUNTBYTES test",
             path: outputPathRoot,
-            parallel: false
+            parallel: false,
+            retries: 0
         };
 
         let tsvPath = __dirname + "/tsv/inventory.tsv";

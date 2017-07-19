@@ -154,6 +154,7 @@ export interface TaskDefinition {
     desc: string;
     path: string;
     parallel: boolean;
+    retries: number;
 }
 
 export interface Workflow {
