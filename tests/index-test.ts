@@ -11,20 +11,20 @@ let outputPathRoot = `${os.tmpdir()}/RUN_${Date.now()}/`;
 fs.mkdirSync(outputPathRoot);
 
 describe("LOADTSV", () => {
-    it("can fetch TSV from a URL", (done) => {
+    it("can fetch TSV from a URL", () => {
 
         let taskDef: LoadTSVTaskDefinition = {
             name: "LOADTSV",
             desc: "LOADTSV test",
             path: outputPathRoot,
-            url: "https://raw.githubusercontent.com/enigma-io/workflow-interview-challenge/master/inventory.tsv"
+            url: "https://raw.githubusercontent.com/enigma-io/workflow-interview-challenge/master/inventory.tsv",
+            parallel: false
         };
 
         let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: LoadTSVTaskDefinition) => Promise<TaskResponse>;
 
-        task([], taskDef).then(result => {
+        return task([], taskDef).then(result => {
             expect(result.files[0]).equal(outputPathRoot + "inventory.tsv");
-            done();
         }).catch(err => {
             console.log(err);
             expect(err).to.be.empty;

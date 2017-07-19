@@ -9,7 +9,7 @@
     "workflow": "npm run clean && npm run build && node build/src/index.js",
     "test": "npm run build_tests && npm run execute_tests",
     "execute_tests": "tslint -c tslint.json 'tests/**/*.ts' && mocha --require source-map-support/register --opts tests/mocha.opts build/tests/**/*-test.js",
-    "build_tests": "tslint -c tslint.json 'src/**/*.ts' && npm run clean && tsc -p . "
+    "build_tests": "tslint -c tslint.json 'tests/**/*.ts' && npm run clean && tsc -p . && cp -r tests/tsv build/tests/tsv"
   },
   "repository": {
     "type": "git",
