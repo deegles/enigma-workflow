@@ -11,7 +11,7 @@ let logPath = outputPathRoot + "log.txt";
 fs.mkdirSync(outputPathRoot);
 
 /**
- * Main workflow runner
+ * Main workflow runner. First task receives an empty list of files.
  */
 async function main() {
 
@@ -43,6 +43,9 @@ async function main() {
                 }
             });
 
+            /**
+             * Some tasks can be run concurrently, group them together to be executed with Promise.All later
+             */
             let canConcat = false;
             let tasks: Array<Array<(files: Array<string>) => Promise<TaskResponse>>> = [];
             tasksInter.forEach(task => {
@@ -64,14 +67,13 @@ async function main() {
             console.log("Error staging tasks: " + err);
         }
 
-
     } else {
         console.log(`Could not find workflow${workflowName ? ": " + workflowName : ", none defined." }`);
     }
 }
 
 /**
- *
+ * Runs each task or set of parallel tasks. Stops the workflow on any failure.
  * @param taskList
  * @param files
  */
@@ -92,9 +94,9 @@ function runTask(taskList: Array<Array<(files: Array<string>) => Promise<TaskRes
         });
 
         if (taskList.length > 1) {
-            runTask(taskList.slice(1), results[0].files); // WARNING: parallel tasks should return the same list of files for the next step
+            runTask(taskList.slice(1), results[0].files); // WARNING: each set of parallel tasks should return the same list of files for the next step
         } else {
-            console.log("\n-------\nWorkflow complete!\n-------\n");
+            console.log(`\n-------\nWorkflow complete!\nGenerated files located at: ${outputPathRoot}\n-------\n`);
         }
     }).catch(err => {
         console.log("Error executing task: " + err);
@@ -102,7 +104,7 @@ function runTask(taskList: Array<Array<(files: Array<string>) => Promise<TaskRes
 }
 
 /**
- * Fetch each task and convert to a promise
+ * Fetch each task and convert to a promise.
  * @param task task definition
  */
 function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<TaskResponse> {
@@ -113,7 +115,7 @@ function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<T
             console.log(message);
             fs.appendFileSync(logPath, message + "\n");
 
-            let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
+            let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as TaskResponseFactory;
 
             try {
                 resolve(task(files, taskDef));
@@ -165,4 +167,8 @@ export interface Workflow {
 export interface TaskResponse {
     message: string;
     files: Array<string>;
+}
+
+export interface TaskResponseFactory {
+    (files: Array<string>, taskDef: TaskDefinition): Promise<TaskResponse>;
 }
