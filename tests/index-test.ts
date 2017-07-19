@@ -2,6 +2,8 @@ import {expect} from "chai";
 import * as os from "os";
 import {TaskDefinition, TaskResponse} from "../src/index";
 import {LoadTSVTaskDefinition} from "../src/tasks/LOADTSV";
+import {MinTaskDefinition} from "../src/tasks/MIN";
+
 import * as fs from "fs";
 import * as assert from "assert";
 
@@ -85,6 +87,87 @@ describe("COUNTBYTES", () => {
             let bytes = message.split(":")[0].trim();
 
             expect(bytes).equal("2557");
+            done();
+        }).catch(err => {
+            console.log(err);
+            expect(err).to.be.empty;
+            done();
+        });
+    });
+});
+
+describe("MIN", () => {
+    it("can get min value", (done) => {
+
+        let taskDef: MinTaskDefinition = {
+            name: "MIN",
+            desc: "MIN test",
+            out: "stats.json",
+            path: outputPathRoot,
+            column: 3,
+            parallel: false,
+            retries: 0
+        };
+
+        let tsvPath = __dirname + "/tsv/inventory.json";
+        let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
+
+        task([tsvPath], taskDef).then(result => {
+            expect(result.message).equal("MIN: 2.9");
+            done();
+        }).catch(err => {
+            console.log(err);
+            expect(err).to.be.empty;
+            done();
+        });
+    });
+});
+
+describe("MAX", () => {
+    it("can get max value", (done) => {
+
+        let taskDef: MinTaskDefinition = {
+            name: "MAX",
+            desc: "MAX test",
+            out: "stats.json",
+            path: outputPathRoot,
+            column: 3,
+            parallel: false,
+            retries: 0
+        };
+
+        let tsvPath = __dirname + "/tsv/inventory.json";
+        let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
+
+        task([tsvPath], taskDef).then(result => {
+            expect(result.message).equal("MAX: 35.29");
+            done();
+        }).catch(err => {
+            console.log(err);
+            expect(err).to.be.empty;
+            done();
+        });
+    });
+});
+
+describe("MEDIAN", () => {
+    it("can get median value", (done) => {
+
+        let taskDef: MinTaskDefinition = {
+            name: "MEDIAN",
+            desc: "MEDIAN test",
+            out: "stats.json",
+            path: outputPathRoot,
+            column: 3,
+            parallel: false,
+            retries: 0
+        };
+
+        let tsvPath = __dirname + "/tsv/inventory.json";
+        let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
+
+        task([tsvPath], taskDef).then(result => {
+            expect(result.message).equal("MEDIAN: 18.775");
             done();
         }).catch(err => {
             console.log(err);
