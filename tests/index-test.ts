@@ -63,3 +63,30 @@ describe("TSVTOJSON", () => {
         });
     });
 });
+
+describe("COUNTBYTES", () => {
+    it("can count file bytes", (done) => {
+
+        let taskDef: TaskDefinition = {
+            name: "COUNTBYTES",
+            desc: "COUNTBYTES test",
+            path: outputPathRoot,
+            parallel: false
+        };
+
+        let tsvPath = __dirname + "/tsv/inventory.tsv";
+        let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
+
+        task([tsvPath], taskDef).then(result => {
+            let message = result.message.split("\n")[1];
+            let bytes = message.split(":")[0].trim();
+
+            expect(bytes).equal("2557");
+            done();
+        }).catch(err => {
+            console.log(err);
+            expect(err).to.be.empty;
+            done();
+        });
+    });
+});
