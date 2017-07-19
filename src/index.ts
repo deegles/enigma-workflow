@@ -5,6 +5,7 @@ import concat = require("concat-stream");
 let workflowsPath = "../workflows";
 let tasksPath = "./tasks";
 let outputPathRoot = `${os.tmpdir()}/RUN_${Date.now()}/`;
+let logPath = outputPathRoot + "log.txt";
 
 // Need to create destination directory before running
 fs.mkdirSync(outputPathRoot);
@@ -28,11 +29,12 @@ async function main() {
 
     // Load the workflow or display error
     if (workflowName && workflows.indexOf(workflowName) > -1) {
-        console.log(`Executing workflow: ${workflowName}`);
-
-        let workflow = await getWorkflow(workflowName);
+        console.log(`-------------\nExecuting workflow: ${workflowName}`);
+        console.log(`Log path:  ${logPath}\n-------------`);
 
         try {
+            let workflow = await getWorkflow(workflowName);
+
             let tasksInter = workflow.tasks.map(task => {
                 if (taskNames.indexOf(task.name) > -1) {
                     return {staged: stageTask(task), parallel: task.parallel};
@@ -76,18 +78,23 @@ async function main() {
 function runTask(taskList: Array<Array<(files: Array<string>) => Promise<TaskResponse>>>, files: Array<string>) {
     let currentTask = taskList[0];
 
+    if (currentTask.length > 1) {
+        console.log(`\n-------\nRunning ${currentTask.length} tasks in parallel!\n-------`);
+    }
+
     Promise.all(currentTask.map(p => {
         return p(files);
     })).then(results => {
 
         results.forEach(result => {
             console.log(result.message);
+            fs.appendFileSync(logPath, result.message + "\n");
         });
 
         if (taskList.length > 1) {
-            runTask(taskList.slice(1), results[0].files);
+            runTask(taskList.slice(1), results[0].files); // WARNING: parallel tasks should return the same list of files for the next step
         } else {
-            console.log("Workflow complete!");
+            console.log("\n-------\nWorkflow complete!\n-------\n");
         }
     }).catch(err => {
         console.log("Error executing task: " + err);
@@ -102,7 +109,10 @@ function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<T
     return (files: Array<string>) => {
         taskDef.path = outputPathRoot;
         return new Promise((resolve, reject) => {
-            console.log(`Running task ${taskDef.name}...`);
+            let message = `\nRunning task ${taskDef.name}...`;
+            console.log(message);
+            fs.appendFileSync(logPath, message + "\n");
+
             let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
 
             try {
