@@ -4,7 +4,10 @@ import * as os from "os";
 import concat = require("concat-stream");
 let workflowsPath = "../workflows";
 let tasksPath = "./tasks";
-let outputPathRoot = os.tmpdir();
+let outputPathRoot = `${os.tmpdir()}/RUN_${Date.now()}/`;
+
+// Need to create destination directory before running
+fs.mkdirSync(outputPathRoot);
 
 /**
  * Main workflow runner
@@ -78,7 +81,7 @@ function stageTask(taskDef: TaskDefinition): (files: Array<string>) => Promise<T
         taskDef.path = outputPathRoot;
         return new Promise((resolve, reject) => {
             console.log(`Running task ${taskDef.name}...`);
-            let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => TaskResponse;
+            let task = require(__dirname + "/" + tasksPath + "/" + taskDef.name).default as (files: Array<string>, taskDef: TaskDefinition) => Promise<TaskResponse>;
 
             try {
                 resolve(task(files, taskDef));
