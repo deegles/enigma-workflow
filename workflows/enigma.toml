@@ -20,18 +20,21 @@ name = "MIN"
 desc = "Get the minimum value of a column of JSON data"
 out = "stats.json"
 column = 3
+parallel = true
 
 [[tasks]]
 name = "MAX"
 desc = "Get the maximum value of a column of JSON data"
 out = "stats.json"
 column = 3
+parallel = true
 
 [[tasks]]
 name = "MEDIAN"
 desc = "Get the median value of a column of JSON data"
 out = "stats.json"
 column = 3
+parallel = true
 
 [[tasks]]
 name = "COUNTBYTES"

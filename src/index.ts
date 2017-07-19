@@ -41,14 +41,21 @@ async function main() {
                 }
             });
 
-            let tasks = tasksInter.reduce((list, curr: { staged: (files: Array<string>) => Promise<TaskResponse>, parallel: boolean }) => {
-                if (curr.parallel && list.length > 0) {
-                    list[list.length - 1] = list[list.length - 1].concat([curr.staged]);
+            let canConcat = false;
+            let tasks: Array<Array<(files: Array<string>) => Promise<TaskResponse>>> = [];
+            tasksInter.forEach(task => {
+                if (!task.parallel) {
+                    tasks.push([task.staged]);
+                    canConcat = false;
+                } else if (canConcat) {
+                    let t = tasks.pop();
+                    tasks.push(t.concat(task.staged));
+                    canConcat = true;
                 } else {
-                    list.push([curr.staged]);
+                    tasks.push([task.staged]);
+                    canConcat = true;
                 }
-                return list;
-            }, []);
+            });
 
             runTask(tasks, []);
         } catch (err) {
