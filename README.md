@@ -6,7 +6,7 @@ Tasks are defined in order of execution. Any task-specific parameters should be 
 
 Each task must implement the following behavior
 
-1. Export a single default function
+1. Export a single default function that returns a Promise
 2. Receive as input an array of strings representing fully qualified file names and an object containing task specific parameters. All tasks should write to the root of the PATH parameter.
 3. Perfom any operations on the input files without modifying them.
 4. Output an object containing an array of strings representing fully qualified file names for the next task and a string property MESSAGE. This will be printed after each task.
