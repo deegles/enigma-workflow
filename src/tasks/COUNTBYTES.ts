@@ -1,12 +1,22 @@
-import {TaskResponse} from "../index";
+import {TaskDefinition, TaskResponse} from "../index";
+import * as fs from "fs";
 
-export default function (files: Array<string>, params: any): TaskResponse {
+export default function (files: Array<string>, params: TaskDefinition): Promise<TaskResponse> {
+    return new Promise((resolve, reject) => {
+        let results: Array<string> = [];
+        try {
+            files.forEach(file => {
+                let stats = fs.statSync(file);
+                results.push(`${stats.size}:${file}`);
+            });
 
-    files.forEach(file => {
-        console.log("file: " + file);
+            resolve({
+                message: `bytes:filename\n\t${results.join("\n\t")}`,
+                files: files
+            });
+
+        } catch (err) {
+            reject(err);
+        }
     });
-    return {
-        message: `Loaded file: ${params["url"]}`,
-        files: ["fakefile"]
-    };
 }
