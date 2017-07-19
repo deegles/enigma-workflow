@@ -7,13 +7,18 @@ export default function (files: Array<string>, params: TaskDefinition): Promise<
         try {
             files.forEach(file => {
                 let raw = fs.readFileSync(file).toString("utf8");
-                let dest = file.slice(0, file.length - 4) + ".json";
+                let pathSplit = file.split("/");
+                let fileName = pathSplit[pathSplit.length - 1];
+                let dest = params.path + fileName.slice(0, fileName.length - 4) + ".json";
 
+                let lines: Array<Array<string>> = [];
                 raw.split("\n").forEach(line => {
                     if (line.length > 0) {
-                        fs.appendFileSync(dest, JSON.stringify(line.split("\t")) + "\n");
+                        lines.push(line.split("\t"));
                     }
                 });
+
+                fs.writeFileSync(dest, JSON.stringify({data: lines}));
 
                 results.push(dest);
             });
